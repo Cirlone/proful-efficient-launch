@@ -1,0 +1,31 @@
+{
+  "name": "proful-eficient-launch",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Proful Eficient — 28s launch advertisement built with Remotion",
+  "scripts": {
+    "dev": "remotion studio",
+    "studio": "remotion studio",
+    "typecheck": "tsc --noEmit",
+    "still": "remotion still src/index.ts ProfulEficientLaunch out/still.png --frame=0",
+    "render:test": "remotion render src/index.ts ProfulEficientLaunch out/test.mp4 --frames=0-89 --crf=28",
+    "render": "remotion render src/index.ts ProfulEficientLaunch out/proful-eficient-launch.mp4 --codec=h264 --crf=16 --pixel-format=yuv420p"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.536",
+    "@remotion/fonts": "4.0.536",
+    "@remotion/media": "4.0.536",
+    "@remotion/noise": "4.0.536",
+    "@remotion/transitions": "4.0.536",
+    "katex": "0.19.0",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
+    "remotion": "4.0.536"
+  },
+  "devDependencies": {
+    "@fontsource/outfit": "5.3.0",
+    "@types/katex": "0.16.8",
+    "@types/react": "19.3.0",
+    "typescript": "5.9.3"
+  }
+}
