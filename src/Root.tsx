@@ -16,6 +16,7 @@ import {
 import { LaunchAd, SCENE_COMPONENTS } from "./LaunchAd";
 import { loadAllFonts } from "./lib/fonts";
 import { Sequence2 } from "./sequence2/Sequence2";
+import { Sequence2Vertical, V_HEIGHT, V_WIDTH } from "./sequence2v/Sequence2Vertical";
 import { TOTAL_FRAMES_S2 } from "./sequence2/timing2";
 
 assertTimeline();
@@ -62,6 +63,16 @@ export const RemotionRoot: React.FC = () => (
       component={Sequence2}
       width={WIDTH}
       height={HEIGHT}
+      fps={FPS}
+      durationInFrames={TOTAL_FRAMES_S2}
+    />
+
+    {/* ▶ Sequence 2 — vertical 9:16 cut (1080×1920), same storyboard and timing */}
+    <Composition
+      id="Sequence2-Vertical"
+      component={Sequence2Vertical}
+      width={V_WIDTH}
+      height={V_HEIGHT}
       fps={FPS}
       durationInFrames={TOTAL_FRAMES_S2}
     />

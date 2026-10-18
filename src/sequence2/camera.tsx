@@ -4,8 +4,25 @@ import { shotMeta, shotSrc, type ShotId } from "../config/assets";
 import { COLORS, cyanA, FONT_FAMILY } from "../config/theme";
 import { easeInOutCubic, easeOutBack, easeOutExpo, lerp, prog } from "../lib/ease";
 
-const W = 1920;
-const H = 1080;
+/** Canvas the camera renders into. Defaults to 16:9 (1920×1080); the vertical cut provides 1080×1920. */
+export type Canvas = {
+  W: number;
+  H: number;
+  /** multiplier for annotation size (callout text, padding) */
+  ui: number;
+  /** leave the screenshot background transparent (a <Background/> is drawn behind) */
+  transparent: boolean;
+  /** draw a rounded, glowing frame around the screenshot (needed when it does not fill the canvas) */
+  frameGlow: boolean;
+};
+export const CanvasContext = React.createContext<Canvas>({
+  W: 1920,
+  H: 1080,
+  ui: 1,
+  transparent: false,
+  frameGlow: false,
+});
+export const useCanvas = () => React.useContext(CanvasContext);
 
 /* ───────────────────────────── camera ───────────────────────────── */
 
@@ -30,7 +47,7 @@ export type MapFn = (x: number, y: number) => [number, number];
 
 /** source px → screen px for a given camera and base fit scale `k`. */
 export const makeMap =
-  (cam: Cam, k: number): MapFn =>
+  (cam: Cam, k: number, W = 1920, H = 1080): MapFn =>
   (x, y) => [W / 2 + (x - cam.cx) * k * cam.z, H / 2 + (y - cam.cy) * k * cam.z];
 
 /* ───────────────────────────── helpers ───────────────────────────── */
@@ -46,6 +63,10 @@ export type CalloutDef = {
   offset: [number, number];
   from: number;
   to?: number;
+  /** absolute SCREEN position of the pill (x = -1 centres it horizontally); replaces anchor+offset placement */
+  at?: [number, number];
+  /** which side of the target the pill sits on (decides where the connector leaves the pill) */
+  side?: "above" | "below";
 };
 
 const lerpPts = (frame: number, pts: CursorPt[]) => {
@@ -118,17 +139,20 @@ export const Cursor: React.FC<{ x: number; y: number; opacity: number; clicks: n
 };
 
 export const Callout: React.FC<{ def: CalloutDef; map: MapFn }> = ({ def, map }) => {
+  const { W, H, ui } = useCanvas();
   const frame = useCurrentFrame();
   const t = prog(frame, def.from, 10, easeOutBack);
   const out = def.to ? 1 - prog(frame, def.to, 6, easeOutExpo) : 1;
   if (t <= 0 || out <= 0) return null;
   const [ax, ay] = map(def.anchor[0], def.anchor[1]);
-  const estW = def.text.length * 25 + 96;
-  const left = Math.min(W - 48 - estW, Math.max(48, ax + def.offset[0]));
-  const top = Math.min(H - 150, Math.max(40, ay + def.offset[1]));
-  const pillH = 92;
-  const lx1 = left + 70;
-  const ly1 = top + pillH;
+  const estW = (def.text.length * 25 + 96) * ui;
+  const wantLeft = def.at ? (def.at[0] === -1 ? (W - estW) / 2 : def.at[0]) : ax + def.offset[0];
+  const wantTop = def.at ? def.at[1] : ay + def.offset[1];
+  const left = Math.min(W - 40 - estW, Math.max(40, wantLeft));
+  const top = Math.min(H - 150, Math.max(40, wantTop));
+  const pillH = 92 * ui;
+  const lx1 = Math.min(left + estW - 40, Math.max(left + 40, ax));
+  const ly1 = def.side === "below" ? top : top + pillH;
   return (
     <>
       {/* connector: makes it unmistakable that the pill is an annotation, not part of the app UI */}
@@ -157,7 +181,7 @@ export const Callout: React.FC<{ def: CalloutDef; map: MapFn }> = ({ def, map })
         transform: `scale(${0.7 + 0.3 * t})`,
         transformOrigin: "0% 100%",
         opacity: Math.min(1, t) * out,
-        padding: "16px 34px 18px",
+        padding: `${16 * ui}px ${34 * ui}px ${18 * ui}px`,
         borderRadius: 999,
         background: `linear-gradient(135deg, rgba(10,22,48,0.96), rgba(6,18,38,0.96))`,
         border: `3px solid ${COLORS.cyan}`,
@@ -165,7 +189,7 @@ export const Callout: React.FC<{ def: CalloutDef; map: MapFn }> = ({ def, map })
         color: COLORS.white,
         fontFamily: FONT_FAMILY,
         fontWeight: 700,
-        fontSize: 46,
+        fontSize: 46 * ui,
         letterSpacing: "-0.01em",
         whiteSpace: "nowrap",
       }}
@@ -202,12 +226,13 @@ export const Screen: React.FC<ScreenProps> = ({
   extras,
   enter = true,
 }) => {
+  const { W, H, transparent, frameGlow } = useCanvas();
   const frame = useCurrentFrame();
   const meta = shotMeta(shot);
   const k = W / meta.w;
   const cam = camAt(frame, camKeys);
   const scale = k * cam.z;
-  const map = makeMap(cam, k);
+  const map = makeMap(cam, k, W, H);
   const clipH = meta.h * (1 - (("cropBottom" in meta ? meta.cropBottom : 0) ?? 0));
 
   const enterT = enter ? prog(frame, 0, 8, easeOutExpo) : 1;
@@ -229,7 +254,7 @@ export const Screen: React.FC<ScreenProps> = ({
       style={{
         position: "absolute",
         inset: 0,
-        backgroundColor: COLORS.bg,
+        backgroundColor: transparent ? "transparent" : COLORS.bg,
         overflow: "hidden",
         opacity: enterOpacity,
         transform: `scale(${1 + 0.045 * (1 - enterT)})`,
@@ -248,7 +273,30 @@ export const Screen: React.FC<ScreenProps> = ({
           willChange: "transform",
         }}
       >
-        <div style={{ position: "absolute", left: 0, top: 0, width: meta.w, height: clipH, overflow: "hidden" }}>
+        {frameGlow && (
+          <div
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: meta.w,
+              height: clipH,
+              borderRadius: 18,
+              boxShadow: `0 0 0 3px ${cyanA(0.55)}, 0 0 90px ${cyanA(0.4)}, 0 40px 120px rgba(0,0,0,0.7)`,
+            }}
+          />
+        )}
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            width: meta.w,
+            height: clipH,
+            overflow: "hidden",
+            borderRadius: frameGlow ? 18 : 0,
+          }}
+        >
           <Img src={shotSrc(shot)} style={{ width: meta.w, height: meta.h, display: "block" }} />
         </div>
 
