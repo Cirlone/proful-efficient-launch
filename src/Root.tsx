@@ -15,6 +15,8 @@ import {
 } from "./config/timing";
 import { LaunchAd, SCENE_COMPONENTS } from "./LaunchAd";
 import { loadAllFonts } from "./lib/fonts";
+import { Sequence2 } from "./sequence2/Sequence2";
+import { TOTAL_FRAMES_S2 } from "./sequence2/timing2";
 
 assertTimeline();
 loadAllFonts();
@@ -52,6 +54,16 @@ export const RemotionRoot: React.FC = () => (
       height={HEIGHT}
       fps={FPS}
       durationInFrames={TOTAL_FRAMES}
+    />
+
+    {/* ▶ Sequence 2 — product demonstration (12 s). Separate composition; Sequence 1 is untouched. */}
+    <Composition
+      id="Sequence2-ProductDemo"
+      component={Sequence2}
+      width={WIDTH}
+      height={HEIGHT}
+      fps={FPS}
+      durationInFrames={TOTAL_FRAMES_S2}
     />
 
     {/* Each scene on its own, for fast iteration */}
