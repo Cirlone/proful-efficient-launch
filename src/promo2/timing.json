@@ -1,0 +1,32 @@
+{
+ "l1": {
+  "start": 0.4,
+  "dur": 2.535,
+  "text": "Pregătirea testelor ți-a mâncat toată seara?"
+ },
+ "l2": {
+  "start": 4.2,
+  "dur": 6.585,
+  "text": "Ai deja un test pregătit? Folosește-l ca model și creează rapid o variantă nouă, fără să o iei de la zero."
+ },
+ "l3": {
+  "start": 11.2,
+  "dur": 5.762,
+  "text": "Încarci testul, precizezi ce vrei să modifici, iar aplicația generează o nouă variantă pentru tine."
+ },
+ "l4": {
+  "start": 19.2,
+  "dur": 4.872,
+  "text": "Verifici exercițiile, faci ultimele ajustări și pregătești testul pentru clasă."
+ },
+ "l5": {
+  "start": 26.9,
+  "dur": 5.438,
+  "text": "Înainte de imprimare, asigură-te că testul este complet și că nu ai omis nicio informație."
+ },
+ "l6": {
+  "start": 32.7,
+  "dur": 5.499,
+  "text": "Profa Eficientă. Mai puțin timp cu pregătirea testelor. Mai mult timp pentru ceea ce contează."
+ }
+}
