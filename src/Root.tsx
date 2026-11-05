@@ -17,6 +17,7 @@ import { LaunchAd, SCENE_COMPONENTS } from "./LaunchAd";
 import { loadAllFonts } from "./lib/fonts";
 import { Sequence2 } from "./sequence2/Sequence2";
 import { Sequence2Vertical, V_HEIGHT, V_WIDTH } from "./sequence2v/Sequence2Vertical";
+import { Promo, PROMO_FPS, PROMO_FRAMES } from "./promo/Promo";
 import { TOTAL_FRAMES_S2 } from "./sequence2/timing2";
 
 assertTimeline();
@@ -76,6 +77,9 @@ export const RemotionRoot: React.FC = () => (
       fps={FPS}
       durationInFrames={TOTAL_FRAMES_S2}
     />
+
+    {/* ▶ Profa Eficientă — 38 s Romanian product promo, 9:16 */}
+    <Composition id="ProfaEficientaPromo" component={Promo} width={1080} height={1920} fps={PROMO_FPS} durationInFrames={PROMO_FRAMES} />
 
     {/* Each scene on its own, for fast iteration */}
     <Folder name="Scenes">
